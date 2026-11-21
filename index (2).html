@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="bn"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2f6fc">
+<title>NetGuard</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>:root,html[data-theme=light]{--bg:#f4f6fb;--c:#fff;--bd:#e2e8f3;--t:#0f1b33;--d:#64748b;--a:#2f6bff;--b:#1b49e0;--ok:#0fb981;--r:#ef4444;--w:#f59e0b;--soft:rgba(15,27,51,.05);--off:#cbd5e1;--nav:rgba(255,255,255,.92);--sheet:#fff;--core:#fff;--hero:linear-gradient(160deg,#091a3f,#0f2a68 55%,#1d4fd8);--sh:0 8px 24px -12px rgba(31,107,255,.28);--glow:rgba(31,107,255,.25);--toast:#0f1b33;--g:linear-gradient(135deg,var(--a),var(--b))}
+html[data-theme=dark]{--bg:#0a0f1e;--c:#131a2d;--bd:rgba(255,255,255,.08);--t:#eaf0ff;--d:#94a3b8;--a:#4f8dff;--b:#2f6bff;--ok:#34d399;--r:#f87171;--w:#fbbf24;--soft:rgba(255,255,255,.07);--off:#33405c;--nav:rgba(19,26,45,.92);--sheet:#131a2d;--core:#0a0f1e;--hero:linear-gradient(160deg,#0b1a3e,#12307a 55%,#1d4fd8);--sh:0 8px 24px -12px #000;--glow:rgba(79,141,255,.35);--toast:#1e2944}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--t);font-family:'Hind Siliguri',system-ui,sans-serif}
+body{min-height:100vh}
+body:before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(40% 30% at 20% 10%,rgba(31,107,255,.14),transparent),radial-gradient(38% 32% at 85% 75%,rgba(18,182,232,.14),transparent);animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(5%,4%) scale(1.1)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes blink{50%{opacity:.5;transform:translate(-50%,-50%) scale(.8)}}@keyframes up{from{transform:translateY(40px);opacity:0}}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit;color:var(--t);width:100%;background:var(--soft);border:1px solid var(--bd);border-radius:14px;padding:13px 14px;outline:0}
+input:focus,select:focus{border-color:var(--a);background:var(--c)}
+select option{color:#000}
+.app{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 96px)}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.3px}
+.dot{width:34px;height:34px;border-radius:11px;background:var(--g);display:grid;place-items:center;color:#fff;font-size:17px;box-shadow:var(--sh)}
+h2{font-size:22px;margin:0 0 4px}.sub{color:var(--d);font-size:14px;margin:0 0 16px}
+.card{background:var(--c);border:1px solid var(--bd);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.row{display:flex;align-items:center;gap:12px}.sp{flex:1;min-width:0}
+.nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ds{color:var(--d);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 11px;border-radius:99px;background:var(--soft);color:var(--d)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--d)}.pill.ok{color:var(--ok);background:rgba(15,185,129,.12)}.pill.ok i{background:var(--ok);box-shadow:0 0 8px var(--ok)}.pill.bad{color:var(--r);background:rgba(239,68,68,.1)}.pill.bad i{background:var(--r)}
+.hero{position:relative;overflow:hidden;border-radius:28px;padding:20px;margin-bottom:12px;background:var(--hero);border:1px solid var(--bd);box-shadow:var(--sh)}
+.hero:before{content:"";position:absolute;right:-60px;top:-60px;width:190px;height:190px;border-radius:50%;background:var(--g);opacity:.16;filter:blur(30px)}
+.btn{padding:13px 18px;border-radius:14px;font-weight:600;background:var(--g);color:#fff;width:100%;box-shadow:var(--sh)}
+.btn.gh{background:var(--soft);color:var(--t);box-shadow:none}.btn.rd{background:rgba(239,68,68,.12);color:var(--r);box-shadow:none}.btn.sm{width:auto;padding:9px 14px;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.st{position:relative;overflow:hidden;background:var(--c);border:1px solid var(--bd);border-radius:20px;padding:14px;box-shadow:var(--sh)}
+.st:before{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--g)}
+.st b{display:block;font-family:'Space Grotesk',sans-serif;font-size:28px;line-height:1.1}.st span{font-size:13px;color:var(--d)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.chip{flex:none;padding:10px 14px;border-radius:99px;border:1px solid var(--bd);background:var(--c);font-size:14px}
+.chip.on{background:var(--g);color:#fff;border-color:transparent;font-weight:600;box-shadow:var(--sh)}
+.sw{width:48px;height:28px;border-radius:99px;background:var(--off);position:relative;flex:none;transition:.25s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw.on{background:var(--g)}.sw.on:after{transform:translateX(20px)}.sw.red.on{background:var(--r)}
+.ic{width:42px;height:42px;border-radius:14px;background:var(--soft);display:grid;place-items:center;font-size:20px;flex:none}
+.sec{font-size:13px;color:var(--d);margin:18px 4px 8px;letter-spacing:.4px}
+.list .row{padding:12px 4px;border-bottom:1px solid var(--bd)}.list .row:last-child{border:0}
+.empty{text-align:center;color:var(--d);padding:38px 10px}.empty big{display:block;font-size:40px;margin-bottom:8px}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(540px,calc(100% - 24px));display:flex;padding:6px;border-radius:26px;background:var(--nav);border:1px solid var(--bd);backdrop-filter:blur(20px);box-shadow:0 14px 34px -12px rgba(15,27,51,.35);z-index:5}
+.nav button{flex:1;padding:8px 0;border-radius:20px;font-size:11px;color:var(--d);display:flex;flex-direction:column;align-items:center;gap:2px}.nav button span{font-size:19px}
+.nav button.on{background:var(--g);color:#fff;font-weight:700;box-shadow:var(--sh)}
+.fab{width:40px;height:40px;border-radius:14px;background:var(--g);color:#fff;font-size:22px;font-weight:700;box-shadow:var(--sh)}
+#bk{position:fixed;inset:0;background:rgba(15,27,51,.45);display:none;align-items:flex-end;justify-content:center;z-index:9;backdrop-filter:blur(4px)}
+#bk.open{display:flex}
+#sheet{width:100%;max-width:560px;background:var(--sheet);border:1px solid var(--bd);border-radius:28px 28px 0 0;padding:22px 18px calc(env(safe-area-inset-bottom,0px) + 22px);animation:up .25s}
+#sheet label{display:block;font-size:13px;color:var(--d);margin:12px 2px 6px}#sheet h3{margin:0 0 6px;font-size:20px}
+.pw{position:relative}.pw button{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:18px}
+#toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-80px);background:var(--toast);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;z-index:20;transition:.3s;box-shadow:var(--sh)}#toast.show{transform:translate(-50%,0)}
+.login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;max-width:420px;margin:0 auto;padding:24px}
+.radar{position:relative;width:100%;max-width:250px;aspect-ratio:1;margin:14px auto}
+.rg{position:absolute;border-radius:50%;border:1px solid rgba(31,107,255,.22)}
+.sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 280deg,rgba(31,107,255,.4) 360deg);animation:spin 3.6s linear infinite}
+.core{position:absolute;inset:34%;border-radius:50%;display:grid;place-content:center;text-align:center;background:var(--core);border:2px solid var(--a);box-shadow:0 0 0 6px var(--glow),var(--sh)}
+.core b{font-family:'Space Grotesk',sans-serif;font-size:30px;line-height:1}.core span{font-size:11px;color:var(--d)}
+.nd{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--ok);border:2px solid var(--c);box-shadow:0 0 10px var(--ok);transform:translate(-50%,-50%);animation:blink 2.4s infinite}
+.nd.bk{background:var(--r);box-shadow:0 0 10px var(--r)}.nd.lm{background:var(--w);box-shadow:0 0 10px var(--w)}
+.lg{display:flex;justify-content:center;gap:16px;font-size:12px;color:var(--d);margin-bottom:14px}.lg i{position:static;display:inline-block;transform:none;animation:none;width:9px;height:9px;margin-right:5px}
+.hero.off .sweep{animation-play-state:paused;opacity:.2}.hero.off .core{border-color:var(--r);box-shadow:0 0 0 6px rgba(239,68,68,.2)}.hero.off .core b{color:var(--r)}
+
+body{font-size:15px;font-family:'Inter','Hind Siliguri',system-ui,sans-serif}body:before{display:none}
+h2{font-weight:700;letter-spacing:-.01em}.sec{font-size:12.5px;font-weight:600;letter-spacing:.3px;margin:20px 4px 10px}
+.card,.st{border-radius:20px;box-shadow:0 1px 2px rgba(16,24,40,.05),0 12px 28px -16px rgba(16,24,40,.18)}
+.st:before{display:none}.st{padding:16px}.st b{font-size:30px;font-weight:700;letter-spacing:-.02em}.st span{font-size:13px}
+.hero{color:#fff;border:0;border-radius:28px;padding:22px;box-shadow:0 26px 50px -22px rgba(16,40,130,.6)}
+.hero:before{right:-40px;top:-70px;width:230px;height:230px;background:radial-gradient(circle,rgba(94,200,255,.55),transparent 70%);opacity:.5;filter:none}
+.hero .nm{color:#fff}.hero .ds,.hero .lg,.hero .core span{color:rgba(255,255,255,.68)}
+.hero .pill{background:rgba(255,255,255,.12);color:#fff}.hero .pill.ok{color:#6ee7b7;background:rgba(110,231,183,.14)}.hero .pill.bad{color:#fecaca;background:rgba(248,113,113,.2)}
+.hero .rg{border-color:rgba(255,255,255,.15)}
+.hero .sweep{background:conic-gradient(from 0deg,transparent 0 270deg,rgba(94,200,255,.5) 360deg)}
+.hero .core{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.35);box-shadow:0 0 0 8px rgba(94,200,255,.1),0 0 40px rgba(94,200,255,.35)}
+.hero .core b{color:#fff}.hero .btn.gh{background:rgba(255,255,255,.14);color:#fff}.hero .btn.rd{background:rgba(248,113,113,.22);color:#fecaca}
+.hero .nd{border-color:#0f2a66}.hero.off .core{border-color:#fca5a5;box-shadow:0 0 0 8px rgba(248,113,113,.18)}.hero.off .core b{color:#fecaca}
+.btn,.fab,.dot{box-shadow:0 8px 18px -8px rgba(29,79,216,.6)}.btn{height:46px;display:flex;align-items:center;justify-content:center}.btn.sm{height:auto}
+.dot{width:36px;height:36px;border-radius:12px}.dot svg{width:18px;height:18px}
+.chip.on{background:linear-gradient(160deg,#2f6bff,#1745d6)}
+.nav{border-radius:24px;padding:6px;box-shadow:0 18px 40px -14px rgba(10,26,63,.45)}
+.nav button{font-size:11px;font-weight:500;padding:9px 0 8px;gap:3px}.nav button svg{width:22px;height:22px}
+.nav button.on{background:linear-gradient(160deg,#2f6bff,#102c75);box-shadow:0 8px 18px -8px rgba(29,79,216,.7)}
+.fab svg{width:18px;height:18px}
+</style></head><body>
+<div id="root"></div><div id="bk" onclick="if(event.target===this)closeM()"><div id="sheet"></div></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),K='netguard_v1';
+let S=null;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+S=S||{routers:[],active:null};let tab='home';
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cur=()=>S.routers.find(r=>r.id===S.active);
+const sw=(on,fn,red)=>`<button class="sw ${on?'on':''} ${red?'red':''}" onclick="${fn}"></button>`;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2300)}
+function modal(h){$('#sheet').innerHTML=h;$('#bk').classList.add('open')}
+function closeM(){$('#bk').classList.remove('open')}
+const CAT=[['সোশ্যাল মিডিয়া',[['tiktok','TikTok','🎵'],['instagram','Instagram','📸'],['facebook','Facebook','👍'],['youtube','YouTube','▶️'],['snapchat','Snapchat','👻'],['x','X (Twitter)','✖️']]],
+['১৮+ ও ঝুঁকিপূর্ণ',[['adult','১৮+ ভিডিও ও সাইট','🔞'],['gambling','জুয়া ও বেটিং','🎰'],['proxy','প্রক্সি ও ভিপিএন সাইট','🛡️']]],
+['গেম ও স্ট্রিমিং',[['games','অনলাইন গেম','🎮'],['netflix','Netflix','🎬']]]];
+const QUICK=[['adult','🔞 ১৮+'],['tiktok','🎵 TikTok'],['instagram','📸 Instagram'],['facebook','👍 Facebook'],['youtube','▶️ YouTube']];
+
+/* ---------- router ---------- */
+async function ping(ip){return !!(await hget('http://'+ip,4000))}
+async function test(id){const r=S.routers.find(x=>x.id===id);if(!r)return;r.online=null;render();
+ r.online=await ping(r.ip);if(r.online){r.type=await detect(r);if(r.type==='tplink'){try{r.err=await tpProbe(r)}catch(e){r.err='প্রোব ব্যর্থ: '+e.message}}}save();render();toast(r.online?'রাউটার পাওয়া গেছে':'রাউটারে পৌঁছানো যাচ্ছে না')}
+function routerForm(first){return `<label>রাউটারের নাম</label><input id="rn" placeholder="যেমন: বাসার রাউটার">
+<label>রাউটার IP</label><input id="ri" inputmode="decimal" placeholder="192.168.0.1" value="${first?'192.168.0.1':''}">
+<label>ইউজারনেম</label><input id="ru" placeholder="admin" autocapitalize="off">
+<label>পাসওয়ার্ড</label><div class="pw"><input id="rp" type="password" placeholder="রাউটার লগইন পাসওয়ার্ড"><button onclick="const i=$('#rp');i.type=i.type=='password'?'text':'password'">👁</button></div>
+<div style="height:18px"></div><button class="btn" onclick="addRouter()">সংযোগ করুন</button>`}
+function addRouter(){const ip=$('#ri').value.trim().replace(/^https?:\/\//,'').replace(/\/+$/,''),u=$('#ru').value.trim(),p=$('#rp').value;
+ if(!ip)return toast('রাউটারের IP দিন');
+ const r={id:uid(),name:$('#rn').value.trim()||'আমার রাউটার',ip,user:u,pass:p,online:null,devices:[],blocks:{},custom:[],vpns:[],vpnBlock:false,paused:false};
+ S.routers.push(r);S.active=r.id;tab='home';save();closeM();render();test(r.id)}
+function delRouter(id){if(!confirm('এই রাউটার মুছবেন?'))return;S.routers=S.routers.filter(r=>r.id!==id);if(S.active===id)S.active=S.routers[0]?.id||null;save();render()}
+function setActive(id){S.active=id;save();render()}
+
+/* ---------- actions ---------- */
+function setPaused(){const r=cur();r.paused=!r.paused;save();render()}
+function setBlock(k){const r=cur();r.blocks[k]=!r.blocks[k];save();render()}
+function addDev(){const n=$('#dn').value.trim(),m=$('#dm').value.trim();if(!n||!m)return toast('নাম ও MAC/IP দিন');
+ cur().devices.push({id:uid(),name:n,addr:m,blocked:false,limit:0});save();closeM();render()}
+const left=ms=>{const m=Math.max(0,Math.floor(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return d?d+' দিন '+h+' ঘন্টা':h?h+' ঘন্টা '+m%60+' মিনিট':m+' মিনিট'};
+const toLocal=ms=>new Date(ms-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+function setDur(n,u){$('#tn').value=n;$('#tu').value=u;$('#td').value=''}
+function devCtl(id){const d=cur().devices.find(x=>x.id===id);
+ modal(`<h3>${esc(d.name)}</h3><label>স্পিড লিমিট (খালি রাখলে লিমিট নেই)</label>
+ <div class="row"><input id="lv" type="number" inputmode="decimal" min="0" placeholder="যেমন: 512" value="${d.lv||''}"><select id="lu" style="width:120px"><option value="KB" ${d.lu==='KB'?'selected':''}>KB/s</option><option value="Mbps" ${d.lu!=='KB'?'selected':''}>Mbps</option></select></div>
+ <label>কতক্ষণ ব্যবহার করতে পারবে (শেষ হলে অটো ব্লক)</label>
+ <div class="chips" style="margin:0 0 10px"><button class="chip" onclick="setDur(1,'h')">১ ঘন্টা</button><button class="chip" onclick="setDur(6,'h')">৬ ঘন্টা</button><button class="chip" onclick="setDur(1,'d')">১ দিন</button><button class="chip" onclick="setDur(7,'d')">৭ দিন</button><button class="chip" onclick="setDur(30,'d')">৩০ দিন</button></div>
+ <div class="row"><input id="tn" type="number" inputmode="decimal" min="0" placeholder="নিজের সময় লিখুন" oninput="$('#td').value=''"><select id="tu" style="width:120px"><option value="m">মিনিট</option><option value="h" selected>ঘন্টা</option><option value="d">দিন</option></select></div>
+ <label>অথবা নির্দিষ্ট তারিখ ও সময় পর্যন্ত</label><input id="td" type="datetime-local" value="${d.until?toLocal(d.until):''}" oninput="$('#tn').value=''">
+ ${d.until?`<div class="ds" style="margin-top:8px">চলছে: বাকি ${left(d.until-Date.now())}</div>`:''}
+ <div style="height:16px"></div><button class="btn" onclick="saveCtl('${id}')">সেভ করুন</button><div style="height:8px"></div><button class="btn rd" onclick="blockNow('${id}')">এখনই ব্লক করুন</button>`)}
+function saveCtl(id){const d=cur().devices.find(x=>x.id===id);
+ const v=parseFloat($('#lv').value),u=$('#lu').value,n=parseFloat($('#tn').value),tu=$('#tu').value,td=$('#td').value;
+ let until=0;if(td)until=new Date(td).getTime();else if(n>0)until=Date.now()+n*{m:6e4,h:36e5,d:864e5}[tu];
+ if(until&&until<=Date.now())return toast('সময় ভবিষ্যতের দিতে হবে');
+ if(v>0){d.lv=v;d.lu=u;d.limit=u==='KB'?v*8:v*1000}else{d.lv=0;d.limit=0}
+ d.until=until;if(until&&d.expired){d.blocked=false;d.expired=false}
+ save();closeM();render();toast('সেভ হয়েছে')}
+function blockNow(id){const r=cur(),d=r.devices.find(x=>x.id===id);d.until=0;d.expired=false;closeM();doBlock(r,d,true)}
+function tick(){let c=0;S.routers.forEach(r=>r.devices.forEach(d=>{if(d.until&&Date.now()>=d.until){d.until=0;d.expired=true;c=1;doBlock(r,d,true,true)}}));if(c){save();render()}}
+setInterval(tick,20000);document.addEventListener('visibilitychange',tick);
+function devBlock(id){const r=cur(),d=r.devices.find(x=>x.id===id);doBlock(r,d,!d.blocked)}
+function devLimit(id,v){cur().devices.find(x=>x.id===id).limit=+v;save();render()}
+function delDev(id){const r=cur();r.devices=r.devices.filter(x=>x.id!==id);save();render()}
+function addCustom(){const i=$('#cd'),v=i.value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');if(!v)return;
+ const r=cur();if(!r.custom.includes(v))r.custom.push(v);save();render()}
+function delCustom(v){const r=cur();r.custom=r.custom.filter(x=>x!==v);save();render()}
+function vpnBlock(){const r=cur();r.vpnBlock=!r.vpnBlock;save();render()}
+function addVpn(){const n=$('#vn').value.trim(),s=$('#vs').value.trim();if(!n||!s)return toast('নাম ও সার্ভার দিন');
+ cur().vpns.push({id:uid(),name:n,server:s,on:false});save();closeM();render()}
+function vpnOn(id){const r=cur();r.vpns.forEach(v=>v.on=v.id===id?!v.on:false);save();render()}
+function delVpn(id){const r=cur();r.vpns=r.vpns.filter(v=>v.id!==id);save();render()}
+const GW=['192.168.0.1','192.168.1.1','192.168.10.1','192.168.31.1','192.168.100.1','192.168.2.1','192.168.3.1','192.168.8.1','10.0.0.1','10.0.1.1'];
+async function hget(url,ms){try{const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;
+ if(P){return await P.get({url,connectTimeout:ms,readTimeout:ms})}
+ const c=new AbortController();setTimeout(()=>c.abort(),ms);await fetch(url,{mode:'no-cors',signal:c.signal});return{status:0}}catch(e){return null}}
+async function findGw(){return(await Promise.all(GW.map(async ip=>(await hget('http://'+ip,1500))?ip:null))).filter(Boolean)}
+function autoIp(){findGw().then(l=>{const i=$('#ri');if(i&&l[0]){i.value=l[0];toast('রাউটার পাওয়া গেছে: '+l[0])}})}
+let searching=false,failed=false;
+const mk=(ip,name)=>({id:uid(),name,ip,user:'',pass:'',online:true,devices:[],blocks:{},custom:[],vpns:[],vpnBlock:false,paused:false});
+function searchView(){return `<div class="login" style="text-align:center"><div class="radar" style="max-width:200px"><i class="rg" style="inset:0"></i><i class="rg" style="inset:25%"></i><div class="sweep" ${failed?'style="animation:none;opacity:.2"':''}></div><div class="core" style="inset:34%"><b style="font-size:24px">⚡</b></div></div>
+<h2>${failed?'রাউটার পাওয়া যায়নি':'রাউটার খোঁজা হচ্ছে…'}</h2><p class="sub">${failed?'ফোন রাউটারের Wi-Fi তে আছে কিনা দেখুন':'একটু অপেক্ষা করুন'}</p>
+${failed?`<button class="btn" onclick="autoAdd()">আবার খুঁজুন</button><div style="height:10px"></div><button class="btn gh" onclick="modal('<h3>নতুন রাউটার</h3>'+routerForm(0))">নিজে যোগ করুন</button>`:''}</div>`}
+async function autoAdd(){searching=true;failed=false;render();const l=await findGw();searching=false;
+ if(!l.length){failed=true;render();return}
+ l.forEach((ip,i)=>{if(!S.routers.some(x=>x.ip===ip))S.routers.push(mk(ip,i?'রাউটার '+(i+1):'আমার রাউটার'))});
+ await Promise.all(S.routers.map(async x=>{if(!x.type)x.type=await detect(x)}));if(!cur())S.active=S.routers[0].id;save();render();syncRouter(1)}
+async function findMore(){toast('খোঁজা হচ্ছে…');const l=await findGw();let n=0;
+ l.forEach(ip=>{if(!S.routers.some(x=>x.ip===ip)){S.routers.push(mk(ip,'রাউটার '+(S.routers.length+1)));n++}});save();render();toast(n?n+'টি নতুন রাউটার পাওয়া গেছে':'নতুন রাউটার পাওয়া যায়নি')}
+function credForm(id){const r=S.routers.find(x=>x.id===id);modal(`<h3>এডমিন লগইন</h3><label>ইউজারনেম</label><input id="cu" value="${esc(r.user)}" placeholder="admin" autocapitalize="off"><label>পাসওয়ার্ড</label><div class="pw"><input id="cp" type="password" value="${esc(r.pass)}" placeholder="রাউটারের এডমিন পাসওয়ার্ড"><button onclick="const i=$('#cp');i.type=i.type=='password'?'text':'password'">👁</button></div><div style="height:18px"></div><button class="btn" onclick="saveCred('${id}')">সেভ করুন</button>`)}
+function saveCred(id){const r=S.routers.find(x=>x.id===id);r.user=$('#cu').value.trim();r.pass=$('#cp').value;save();closeM();render();toast('সেভ হয়েছে')}
+/* ---------- Tenda adapter ---------- */
+function md5(str){const u=unescape(encodeURIComponent(str)),K=[],S=[7,12,17,22,5,9,14,20,4,11,16,23,6,10,15,21];
+ for(let i=0;i<64;i++)K[i]=Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0;
+ const n=u.length,w=[];for(let i=0;i<n;i++)w[i>>2]|=u.charCodeAt(i)<<((i%4)*8);w[n>>2]|=0x80<<((n%4)*8);
+ const len=(((n+8)>>6)+1)*16;for(let i=0;i<len;i++)w[i]=w[i]|0;w[len-2]=n*8;
+ let a=0x67452301,b=0xefcdab89|0,c=0x98badcfe|0,d=0x10325476;
+ for(let o=0;o<len;o+=16){let A=a,B=b,C=c,D=d;
+  for(let i=0;i<64;i++){let f,g;const r=i>>4;
+   if(r==0){f=(B&C)|(~B&D);g=i}else if(r==1){f=(D&B)|(~D&C);g=(5*i+1)%16}else if(r==2){f=B^C^D;g=(3*i+5)%16}else{f=C^(B|~D);g=(7*i)%16}
+   const t=D;D=C;C=B;const x=(A+f+K[i]+w[o+g])|0,sh=S[(r<<2)|(i&3)];B=(B+((x<<sh)|(x>>>(32-sh))))|0;A=t}
+  a=(a+A)|0;b=(b+B)|0;c=(c+C)|0;d=(d+D)|0}
+ const h=v=>{let s='';for(let i=0;i<4;i++)s+=('0'+((v>>>(i*8))&255).toString(16)).slice(-2);return s};return h(a)+h(b)+h(c)+h(d)}
+async function tReq(r,m,path,data,x){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;if(!P)throw new Error('শুধু APK অ্যাপে কাজ করে');
+ const h={'X-Requested-With':'XMLHttpRequest',Referer:'http://'+r.ip+'/index.html'};if(r.ck)h.Cookie=r.ck;
+ if(data!=null)h['Content-Type']='application/x-www-form-urlencoded; charset=UTF-8';
+ const o=Object.assign({url:'http://'+r.ip+path,headers:h,connectTimeout:6000,readTimeout:8000},x||{});if(data!=null)o.data=data;return P[m](o)}
+const jd=x=>{let d=x&&x.data;if(typeof d==='string'){try{d=JSON.parse(d)}catch(e){}}return d};
+async function tLogin(r){let tok='';
+ try{const g=await tReq(r,'get','/goform/getstok?random='+Math.random(),null),m=/[0-9a-f]{16,}/i.exec(typeof g.data==='string'?g.data:JSON.stringify(g.data));if(m)tok=m[0]}catch(e){}
+ const pw=tok?md5(btoa(r.pass)+tok):md5(r.pass);
+ const x=await tReq(r,'post','/login/Auth','username='+encodeURIComponent(r.user||'admin')+'&password='+pw,{disableRedirects:true});
+ const m=/(ecos_pw|password)=([^;,"\s\\]+)/i.exec(JSON.stringify(x.headers||{}));
+ if(!m)throw new Error('লগইন হয়নি — এডমিন পাসওয়ার্ড ঠিক আছে?');r.ck=m[1]+'='+m[2]}
+async function tClients(r){let x=await tReq(r,'get','/goform/getOnlineList?random='+Math.random(),null),j=jd(x),own=Array.isArray(j);
+ if(!own){x=await tReq(r,'get','/goform/getQos?random='+Math.random()+'&modules=onlineList',null);j=jd(x);j=j&&j.onlineList}
+ if(!Array.isArray(j))throw new Error('ডিভাইস তালিকা পড়া যায়নি: '+String(x.data).slice(0,90));
+ return j.map((o,i)=>({ip:o.qosListIP||o.ip||o.IP||o.ipAddr||'',mac:String(o.qosListMAC||o.mac||o.MAC||o.macAddr||'').toUpperCase().replace(/-/g,':'),
+  name:o.qosListRemark||o.qosListHostname||o.hostName||o.devName||o.name||'',me:own&&i===0&&j.length>1}))}
+async function tBlock(r,mac,on,name){const rd=async()=>jd(await tReq(r,'get','/goform/getMacFilterCfg?random='+Math.random(),null));
+ const g=await rd();if(!g||typeof g!=='object')throw new Error('MAC ফিল্টার পড়া যায়নি');
+ if(/white/i.test(String(g.macFilterType||g.mode||'')))throw new Error('রাউটারে শুধু-অনুমতি (white) মোড চালু, তাই বদলাইনি');
+ const norm=t=>String(t).toUpperCase().replace(/-/g,':');
+ let rows=String(g.deviceList||g.macFilterList||'').split('\n').filter(x=>x.trim()).filter(x=>!norm(x).includes(mac));
+ if(on)rows.push((name||'device').replace(/[\r\n]/g,' ')+'\r'+mac);
+ await tReq(r,'post','/goform/setMacFilterCfg?'+Math.random(),'macFilterType='+(rows.length?'black':'disable')+'&deviceList='+encodeURIComponent(rows.join('\n')));
+ const v=await rd(),now=norm((v&&(v.deviceList||v.macFilterList))||'').includes(mac);
+ if(now!==on)throw new Error('রাউটার পরিবর্তন নেয়নি')}
+/* ---------- ASUS adapter ---------- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function aReq(r,m,path,data,x){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;if(!P)throw new Error('শুধু APK অ্যাপে কাজ করে');
+ const h={'User-Agent':'asusrouter--DUTUtil-',Referer:'http://'+r.ip+'/Main_Login.asp'};if(r.ck)h.Cookie=r.ck;
+ if(data!=null)h['Content-Type']='application/x-www-form-urlencoded';
+ const o=Object.assign({url:'http://'+r.ip+path,headers:h,connectTimeout:6000,readTimeout:10000},x||{});if(data!=null)o.data=data;return P[m](o)}
+async function aLogin(r){const x=await aReq(r,'post','/login.cgi','group_id=&action_mode=&action_script=&action_wait=5&current_page=Main_Login.asp&next_page=index.asp&login_authorization='+encodeURIComponent(btoa((r.user||'admin')+':'+r.pass)),{disableRedirects:true});
+ const t=JSON.stringify(x.headers||{})+(typeof x.data==='string'?x.data:JSON.stringify(x.data||'')),m=/asus_token["'=:\s]+["']?([A-Za-z0-9]{8,})/.exec(t);
+ if(!m)throw new Error('লগইন হয়নি — ইউজারনেম/পাসওয়ার্ড ঠিক আছে? (ASUS-এ সাধারণত admin / admin)');r.ck='asus_token='+m[1]}
+async function aClients(r){const x=await aReq(r,'get','/appGet.cgi?hook=get_clientlist()',null),j=jd(x),c=j&&j.get_clientlist;
+ if(!c||typeof c!=='object')throw new Error('ডিভাইস তালিকা পড়া যায়নি: '+String(x.data).slice(0,90));
+ return Object.keys(c).filter(k=>k.length===17&&c[k]&&c[k].isOnline==='1').map(k=>({mac:k.toUpperCase(),ip:c[k].ip||'',name:c[k].nickName||c[k].name||'',me:false}))}
+async function aBlock(r,mac,on){
+ const rd=async()=>jd(await aReq(r,'get','/appGet.cgi?hook=nvram_get(wl0_macmode);nvram_get(wl0_maclist_x);nvram_get(wl1_macmode);nvram_get(wl1_maclist_x)',null));
+ const g=await rd();if(!g||g.wl0_macmode===undefined)throw new Error('ওয়্যারলেস MAC ফিল্টার পড়া যায়নি');
+ if(/allow/i.test(String(g.wl0_macmode)+String(g.wl1_macmode)))throw new Error('রাউটারে শুধু-অনুমতি (allow) মোড চালু, তাই বদলাইনি');
+ const up=k=>{const l=String(g[k]||'').split('<').filter(Boolean).filter(m=>m.toUpperCase()!==mac);if(on)l.push(mac);return l};
+ const a=up('wl0_maclist_x'),b=up('wl1_maclist_x'),enc=l=>encodeURIComponent(l.map(m=>'<'+m).join(''));
+ try{await aReq(r,'post','/applyapp.cgi','action_mode=apply&rc_service=restart_wireless&wl0_macmode='+(a.length?'deny':'disabled')+'&wl0_maclist_x='+enc(a)+'&wl1_macmode='+(b.length?'deny':'disabled')+'&wl1_maclist_x='+enc(b))}catch(e){}
+ const has=(v,k)=>String(v[k]||'').toUpperCase().includes(mac);
+ for(let i=0;i<8;i++){await sleep(4000);try{const v=await rd();if(v&&has(v,'wl0_maclist_x')===on&&has(v,'wl1_maclist_x')===on)return}catch(e){}}
+ throw new Error('রাউটার পরিবর্তন নেয়নি')}
+async function tpProbe(r){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;let o='';
+ for(const f of ['keys','auth']){try{const x=await P.post({url:'http://'+r.ip+'/cgi-bin/luci/;stok=/login?form='+f,headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},data:'operation=read',connectTimeout:5000,readTimeout:5000});o+=f+': '+String(typeof x.data==='string'?x.data:JSON.stringify(x.data)).slice(0,110)+' | '}catch(e){o+=f+': ERR '+e.message+' | '}}
+ return 'TP-Link প্রোব → '+o}
+async function detect(r){const x=await hget('http://'+r.ip+'/',3000),t=(x&&typeof x.data==='string'?x.data:'').toLowerCase();return /tenda/.test(t)?'tenda':/asus/.test(t)?'asus':/tp-?link/.test(t)?'tplink':''}
+const AD={tenda:{login:tLogin,clients:tClients,block:tBlock},asus:{login:aLogin,clients:aClients,block:aBlock}};
+async function doBlock(r,d,on,auto){const A=AD[r.type];
+ if(A&&r.pass&&d.addr){if(r.type==='asus'&&!auto&&!confirm('ওয়াইফাই কয়েক সেকেন্ডের জন্য বন্ধ হবে। চালিয়ে যাবেন?'))return false;try{try{if(!r.ck)await A.login(r);await A.block(r,d.addr,on,d.name)}catch(e){r.ck='';await A.login(r);await A.block(r,d.addr,on,d.name)}}
+  catch(e){toast('রাউটারে হয়নি: '+e.message);return false}d.blocked=on;d.real=true}
+ else{d.blocked=on;d.real=false;toast('শুধু অ্যাপে সেভ হয়েছে, রাউটারে নয়')}
+ if(!on)d.expired=false;save();render();return true}
+async function syncRouter(q){const r=cur();if(!r||scanning)return;const A=AD[r.type];if(!A||!r.pass)return sweep(q);
+ scanning=true;render();
+ try{let list;try{if(!r.ck)await A.login(r);list=await A.clients(r)}catch(e){r.ck='';await A.login(r);list=await A.clients(r)}
+  r.devices.forEach(d=>{if(d.addr)d.on=false});
+  list.forEach(c=>{if(!c.mac)return;const d=r.devices.find(x=>x.addr===c.mac);
+   if(d){d.ip=c.ip;d.on=true;if(!d.renamed&&c.name)d.name=c.name}
+   else r.devices.push({id:uid(),name:c.me?'এই ফোন':(c.name||c.mac.slice(-5)),addr:c.mac,ip:c.ip,blocked:false,limit:0,on:true})});
+  r.err='';if(!q)toast(list.length+' টি ডিভাইস পাওয়া গেছে')}
+ catch(e){r.err=e.message;if(!q)toast(e.message)}
+ scanning=false;save();render()}
+let scanning=false,lastScan=0;
+const act=r=>r.devices.filter(d=>d.on!==false);
+async function alive(ip){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;if(!P)return{ok:false,ms:0,msg:'NoPlugin'};const t=Date.now();
+ try{await P.get({url:'http://'+ip+':80/',connectTimeout:900,readTimeout:900});return{ok:true,ms:Date.now()-t,msg:'open'}}
+ catch(e){const ms=Date.now()-t,msg=String((e&&e.message)||e);return{ok:/refus/i.test(msg)||(ms<600&&!/time|unreach|route/i.test(msg)),ms,msg}}}
+async function sweep(q){const r=cur();if(!r||scanning)return;const base=r.ip.split('.').slice(0,3).join('.');
+ if(!/^\d+\.\d+\.\d+$/.test(base))return;scanning=true;lastScan=Date.now();if(!q)toast('ডিভাইস খোঁজা হচ্ছে…');render();
+ const ips=[],found=[],rs=[];for(let i=2;i<255;i++){if(base+'.'+i!==r.ip)ips.push(base+'.'+i)}
+ for(let i=0;i<ips.length;i+=40){const b=ips.slice(i,i+40),res=await Promise.all(b.map(alive));b.forEach((ip,k)=>{rs.push(res[k]);if(res[k].ok)found.push(ip)})}
+ const own=rs.map(x=>(/from \/(\d+\.\d+\.\d+\.\d+)/.exec(x.msg)||[])[1]).find(Boolean);
+ const fast=rs.filter(x=>x.ms<600).length,smp=(rs.find(x=>x.ms<600&&!x.ok)||rs.find(x=>x.ms>=600)||rs[0]||{}).msg;
+ r.diag='v3 · পরীক্ষা '+rs.length+' · দ্রুত '+fast+' · ধীর '+(rs.length-fast)+' · '+String(smp).slice(0,80);
+ r.devices.forEach(d=>{if(d.ip){d.on=found.includes(d.ip);if(d.ip===own&&/^ডিভাইস \d+$/.test(d.name))d.name='এই ফোন'}});
+ found.forEach(ip=>{if(!r.devices.some(d=>d.ip===ip))r.devices.push({id:uid(),name:ip===own?'এই ফোন':'ডিভাইস '+ip.split('.')[3],addr:'',ip,blocked:false,limit:0,on:true})});
+ scanning=false;save();render();if(!q||found.length)toast(found.length+' টি ডিভাইস পাওয়া গেছে')}
+function renameDev(id){const d=cur().devices.find(x=>x.id===id);modal(`<h3>নাম বদলান</h3><label>নাম</label><input id="rnm" value="${esc(d.name)}"><div style="height:18px"></div><button class="btn" onclick="saveName('${id}')">সেভ করুন</button>`)}
+function saveName(id){const v=$('#rnm').value.trim();if(v){const d=cur().devices.find(x=>x.id===id);d.name=v;d.renamed=true}save();closeM();render()}
+function go(t){tab=t;render();scrollTo(0,0);if((t==='home'||t==='dev')&&Date.now()-lastScan>60000){lastScan=Date.now();syncRouter(1)}}
+
+/* ---------- views ---------- */
+function pillOf(r){return r.online===null?'<span class="pill"><i></i>চেক হচ্ছে</span>':r.online?'<span class="pill ok"><i></i>অনলাইন</span>':'<span class="pill bad"><i></i>পৌঁছানো যাচ্ছে না</span>'}
+function vHome(r){
+ const D=act(r),n=D.length,bl=D.filter(d=>d.blocked).length,lm=D.filter(d=>d.limit).length;
+ const all=CAT.flatMap(c=>c[1]).map(a=>a[0]),nb=all.filter(k=>r.blocks[k]).length+r.custom.length,vp=r.vpns.find(v=>v.on);
+ const dots=D.map((d,i)=>{const a=i*2.399,q=24+(i*37)%22;return `<i class="nd ${d.blocked?'bk':d.limit?'lm':''}" style="left:${50+q*Math.cos(a)}%;top:${50+q*Math.sin(a)}%;animation-delay:${(i%7)*.4}s"></i>`}).join('');
+ return `<div class="hero ${r.paused?'off':''}"><div class="row" style="position:relative"><div class="sp"><div class="nm" style="font-size:22px">${esc(r.name)}</div><div class="ds">${esc(r.ip)}</div></div>${pillOf(r)}</div>
+ <div class="radar"><i class="rg" style="inset:0"></i><i class="rg" style="inset:17%"></i><i class="rg" style="inset:34%"></i><div class="sweep"></div>${dots}<div class="core"><b>${n}</b><span>${scanning?'খোঁজা হচ্ছে…':'ডিভাইস'}</span></div></div>
+ <div class="lg"><span><i class="nd"></i>সক্রিয়</span><span><i class="nd bk"></i>ব্লকড</span><span><i class="nd lm"></i>লিমিট</span></div>
+ <button class="btn sm ${r.paused?'rd':'gh'}" style="width:100%" onclick="setPaused()">${r.paused?'⏵ ইন্টারনেট চালু করুন':'⏸ সব ইন্টারনেট বন্ধ'}</button></div>
+ <div class="grid"><div class="st"><b>${n-bl}</b><span>সক্রিয়</span></div><div class="st"><b style="color:var(--r)">${bl}</b><span>ব্লকড ডিভাইস</span></div>
+ <div class="st"><b style="color:var(--w)">${lm}</b><span>স্পিড লিমিট</span></div><div class="st"><b style="color:var(--a)">${nb}</b><span>ব্লকড অ্যাপ/সাইট</span></div></div>
+ <div class="sec">দ্রুত ব্লক</div><div class="chips">${QUICK.map(q=>`<button class="chip ${r.blocks[q[0]]?'on':''}" onclick="setBlock('${q[0]}')">${q[1]}</button>`).join('')}</div>
+ <div class="card row" onclick="go('vpn')"><div class="ic">🔐</div><div class="sp"><div class="nm">ভিপিএন</div><div class="ds">${vp?esc(vp.name)+' সংযুক্ত':'সংযুক্ত নেই'}</div></div><span class="pill ${vp?'ok':''}"><i></i>${vp?'চালু':'বন্ধ'}</span></div>`}
+function vDev(r){return `<div class="row" style="margin-bottom:6px"><div class="sp"><h2>ডিভাইস</h2><p class="sub" style="margin:0">${scanning?'খোঁজা হচ্ছে…':act(r).length+' টি অনলাইন · ব্লক ও লিমিট'}</p></div><button class="fab" style="margin-right:8px" onclick="syncRouter()">⟳</button><button class="fab" onclick="devForm()">+</button></div>
+ <div style="height:12px"></div>`+(r.devices.length?r.devices.map(d=>`<div class="card"><div class="row"><div class="ic">📱</div><div class="sp"><div class="nm" onclick="renameDev('${d.id}')">${esc(d.name)} ✎</div><div class="ds">${esc((d.on===false?"অফলাইন · ":"")+(d.ip&&d.addr?d.ip+" · "+d.addr:(d.ip||d.addr)))}</div></div>
+ <span class="ds">${d.blocked?'ব্লকড':'ব্লক'}</span>${sw(d.blocked,`devBlock('${d.id}')`,1)}</div>
+ <div class="chips" style="margin:12px 0 0;flex-wrap:wrap">${d.limit?`<span class="pill">⚡ ${d.lv} ${d.lu==='KB'?'KB/s':'Mbps'}</span>`:''}${d.until?`<span class="pill">⏳ বাকি ${left(d.until-Date.now())}</span>`:''}${d.blocked&&d.real?'<span class="pill ok"><i></i>রাউটারে ব্লকড ✓</span>':''}${d.expired&&d.blocked?'<span class="pill bad"><i></i>মেয়াদ শেষ</span>':''}</div>
+ <div class="row" style="margin-top:12px"><button class="btn gh sm" style="flex:1" onclick="devCtl(\'${d.id}\')">⚙ লিমিট ও সময়</button>
+ <button class="btn rd sm" onclick="delDev('${d.id}')">মুছুন</button></div></div>`).join(''):`<div class="empty"><big>📱</big>কোনো ডিভাইস নেই<br><span class="ds">+ চেপে মোবাইল যোগ করুন</span></div>`)}
+function devForm(){modal(`<h3>নতুন ডিভাইস</h3><label>নাম</label><input id="dn" placeholder="যেমন: রাফির মোবাইল"><label>MAC বা IP</label><input id="dm" placeholder="AA:BB:CC:11:22:33" autocapitalize="off"><div style="height:18px"></div><button class="btn" onclick="addDev()">যোগ করুন</button>`)}
+function vBlock(r){return `<h2>কন্টেন্ট ব্লক</h2><p class="sub">অ্যাপ ও সাইট একটা টাচে বন্ধ</p>`+CAT.map(c=>`<div class="sec">${c[0]}</div><div class="card list" style="padding:6px 14px">${c[1].map(a=>`<div class="row"><div class="ic">${a[2]}</div><div class="sp nm">${a[1]}</div>${sw(r.blocks[a[0]],`setBlock('${a[0]}')`,1)}</div>`).join('')}</div>`).join('')+
+ `<div class="sec">নিজের সাইট ব্লক</div><div class="card"><div class="row"><input id="cd" placeholder="example.com" autocapitalize="off"><button class="fab" onclick="addCustom()">+</button></div>
+ <div class="chips" style="flex-wrap:wrap;margin:12px 0 0">${r.custom.map(v=>`<button class="chip on" onclick="delCustom('${esc(v)}')">${esc(v)} ✕</button>`).join('')}</div></div>`}
+function vVpn(r){const vp=r.vpns.find(v=>v.on);
+ return `<div class="row"><div class="sp"><h2>ভিপিএন</h2><p class="sub" style="margin:0">কানেক্ট ও নিয়ন্ত্রণ</p></div><button class="fab" onclick="vpnForm()">+</button></div><div style="height:12px"></div>
+ <div class="hero"><div class="row" style="position:relative"><div class="ic" style="width:54px;height:54px;font-size:26px">${vp?'🔒':'🔓'}</div><div class="sp"><div class="nm" style="font-size:18px">${vp?esc(vp.name):'সংযুক্ত নেই'}</div><div class="ds">${vp?esc(vp.server):'একটি প্রোফাইল চালু করুন'}</div></div></div></div>
+ <div class="card row"><div class="ic">🚷</div><div class="sp"><div class="nm">ডিভাইসে ভিপিএন ব্লক</div><div class="ds">ভিপিএন দিয়ে ব্লক এড়ানো বন্ধ</div></div>${sw(r.vpnBlock,'vpnBlock()')}</div>
+ <div class="sec">প্রোফাইল</div>`+(r.vpns.length?`<div class="card list" style="padding:6px 14px">${r.vpns.map(v=>`<div class="row"><div class="ic">🔐</div><div class="sp"><div class="nm">${esc(v.name)}</div><div class="ds">${esc(v.server)}</div></div><button class="ds" onclick="delVpn('${v.id}')">✕</button>${sw(v.on,`vpnOn('${v.id}')`)}</div>`).join('')}</div>`:`<div class="empty"><big>🔐</big>কোনো ভিপিএন প্রোফাইল নেই</div>`)}
+function vpnForm(){modal(`<h3>ভিপিএন প্রোফাইল</h3><label>নাম</label><input id="vn" placeholder="যেমন: অফিস ভিপিএন"><label>সার্ভার</label><input id="vs" placeholder="vpn.example.com" autocapitalize="off"><div style="height:18px"></div><button class="btn" onclick="addVpn()">যোগ করুন</button>`)}
+function vRouters(){return `<div class="row"><div class="sp"><h2>রাউটার</h2><p class="sub" style="margin:0">যেকোনো রাউটার যোগ করুন</p></div><button class="fab" style="margin-right:8px" onclick="findMore()">⟳</button><button class="fab" onclick="modal('<h3>নতুন রাউটার</h3>'+routerForm(0))">+</button></div><div style="height:12px"></div>`+
+ S.routers.map(r=>`<div class="card"><div class="row"><div class="ic">📡</div><div class="sp"><div class="nm">${esc(r.name)}</div><div class="ds">${esc(r.ip)}${r.type?' · '+({tenda:'Tenda',asus:'ASUS',tplink:'TP-Link'})[r.type]:''}</div></div>${pillOf(r)}</div>${r.err?`<div class="ds" style="margin-top:8px;color:var(--r)">${esc(r.err)}</div>`:''}${r.type&&!AD[r.type]?'<div class="ds" style="margin-top:8px">এই ব্র্যান্ডের ব্লক এখনো যোগ হয়নি — টেস্ট চাপুন</div>':''}
+ <div class="row" style="margin-top:12px"><button class="btn gh sm" style="flex:1" onclick="credForm('${r.id}')">${r.pass?'লগইন ✓':'লগইন'}</button><button class="btn gh sm" style="flex:1" onclick="test('${r.id}')">টেস্ট</button>
+ ${r.id===S.active?'<span class="pill ok" style="flex:1;justify-content:center"><i></i>সক্রিয়</span>':`<button class="btn sm" style="flex:1" onclick="setActive('${r.id}')">ব্যবহার করুন</button>`}
+ <button class="btn rd sm" onclick="delRouter('${r.id}')">মুছুন</button></div></div>`).join('')}
+
+function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';save();render()}
+function render(){const r=cur(),root=$('#root');document.documentElement.dataset.theme=S.theme==='dark'?'dark':'light';
+ if(!r){root.innerHTML=searchView();if(!searching&&!failed)autoAdd();return}
+ const V={home:vHome,dev:vDev,block:vBlock,vpn:vVpn,router:vRouters}[tab](r);
+ const IC={home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>`,dev:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>`,block:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></svg>`,vpn:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>`,router:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a15 15 0 0120 0"/><path d="M5 12.5a10 10 0 0114 0"/><path d="M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>`};
+const N=[['home',IC.home,'হোম'],['dev',IC.dev,'ডিভাইস'],['block',IC.block,'ব্লক'],['vpn',IC.vpn,'ভিপিএন'],['router',IC.router,'রাউটার']];
+ root.innerHTML=`<div class="app"><div class="top"><div class="brand"><div class="dot"><svg viewBox="0 0 24 24" fill="#fff"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></div>NetGuard</div><div class="row">${tab==='home'?pillOf(r):''}<button class="fab" style="width:36px;height:36px;border-radius:12px" onclick="toggleTheme()">${S.theme==='dark'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>'}</button></div></div>${V}</div>
+ <div class="nav">${N.map(n=>`<button class="${tab===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('')}</div>`}
+tick();render();if(cur())syncRouter(1);
+</script></body></html>
