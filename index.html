@@ -96,7 +96,7 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cur=()=>S.routers.find(r=>r.id===S.active);
 const sw=(on,fn,red)=>`<button class="sw ${on?'on':''} ${red?'red':''}" onclick="${fn}"></button>`;
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2300)}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),Math.max(2300,m.length*80))}
 function modal(h){$('#sheet').innerHTML=h;$('#bk').classList.add('open')}
 function closeM(){$('#bk').classList.remove('open')}
 const CAT=[['সোশ্যাল মিডিয়া',[['tiktok','TikTok','🎵'],['instagram','Instagram','📸'],['facebook','Facebook','👍'],['youtube','YouTube','▶️'],['snapchat','Snapchat','👻'],['x','X (Twitter)','✖️']]],
@@ -153,10 +153,10 @@ function delDev(id){const r=cur();r.devices=r.devices.filter(x=>x.id!==id);save(
 function addCustom(){const i=$('#cd'),v=i.value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');if(!v)return;
  const r=cur(),sn=snap(r);if(!r.custom.includes(v))r.custom.push(v);save();render();webSync(r,sn)}
 function delCustom(v){const r=cur(),sn=snap(r);r.custom=r.custom.filter(x=>x!==v);save();render();webSync(r,sn)}
-function vpnBlock(){const r=cur();r.vpnBlock=!r.vpnBlock;save();render()}
+function vpnBlock(){toast('এই অপশন এখনো রাউটারে কাজ করে না')}
 function addVpn(){const n=$('#vn').value.trim(),s=$('#vs').value.trim();if(!n||!s)return toast('নাম ও সার্ভার দিন');
  cur().vpns.push({id:uid(),name:n,server:s,on:false});save();closeM();render()}
-function vpnOn(id){const r=cur();r.vpns.forEach(v=>v.on=v.id===id?!v.on:false);save();render()}
+function vpnOn(id){toast('ভিপিএন কানেকশন এখনো এই অ্যাপে যোগ হয়নি, তাই কানেক্ট হবে না')}
 function delVpn(id){const r=cur();r.vpns=r.vpns.filter(v=>v.id!==id);save();render()}
 const GW=['192.168.0.1','192.168.1.1','192.168.10.1','192.168.31.1','192.168.100.1','192.168.2.1','192.168.3.1','192.168.8.1','10.0.0.1','10.0.1.1','192.168.50.1','192.168.0.254','192.168.1.254','192.168.123.1','192.168.4.1','192.168.5.1','192.168.20.1','192.168.18.1','192.168.88.1','192.168.15.1','192.168.11.1','10.10.10.1'];
 async function hget(url,ms){try{const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;
@@ -231,14 +231,20 @@ async function aClients(r){const x=await aReq(r,'get','/appGet.cgi?hook=get_clie
  return Object.keys(c).filter(k=>k.length===17&&c[k]&&c[k].isOnline==='1').map(k=>({mac:k.toUpperCase(),ip:c[k].ip||'',name:c[k].nickName||c[k].name||'',me:false}))}
 async function aBlock(r,mac,on){
  const rd=async()=>jd(await aReq(r,'get','/appGet.cgi?hook=nvram_get(wl0_macmode);nvram_get(wl0_maclist_x);nvram_get(wl1_macmode);nvram_get(wl1_maclist_x)',null));
- const g=await rd();if(!g||g.wl0_macmode===undefined)throw new Error('ওয়্যারলেস MAC ফিল্টার পড়া যায়নি');
+ const g=await rd();if(!g||g.wl0_macmode===undefined)throw new Error('ওয়্যারলেস MAC ফিল্টার পড়া যায়নি: '+JSON.stringify(g).slice(0,100));
  if(/allow/i.test(String(g.wl0_macmode)+String(g.wl1_macmode)))throw new Error('রাউটারে শুধু-অনুমতি (allow) মোড চালু, তাই বদলাইনি');
  const up=k=>{const l=String(g[k]||'').split('<').filter(Boolean).filter(m=>m.toUpperCase()!==mac);if(on)l.push(mac);return l};
  const a=up('wl0_maclist_x'),b=up('wl1_maclist_x'),enc=l=>encodeURIComponent(l.map(m=>'<'+m).join(''));
- try{await aReq(r,'post','/applyapp.cgi','action_mode=apply&rc_service=restart_wireless&wl0_macmode='+(a.length?'deny':'disabled')+'&wl0_maclist_x='+enc(a)+'&wl1_macmode='+(b.length?'deny':'disabled')+'&wl1_maclist_x='+enc(b))}catch(e){}
- const has=(v,k)=>String(v[k]||'').toUpperCase().includes(mac);
- for(let i=0;i<8;i++){await sleep(4000);try{const v=await rd();if(v&&has(v,'wl0_maclist_x')===on&&has(v,'wl1_maclist_x')===on)return}catch(e){}}
- throw new Error('রাউটার পরিবর্তন নেয়নি')}
+ const has=(v,k)=>String(v[k]||'').toUpperCase().includes(mac);let lv='',ap='';
+ const ok=async n=>{for(let i=0;i<n;i++){await sleep(4000);try{const v=await rd();lv=JSON.stringify(v).slice(0,120);if(v&&has(v,'wl0_maclist_x')===on&&has(v,'wl1_maclist_x')===on)return true}catch(e){lv='ERR '+e.message}}return false};
+ try{const y=await aReq(r,'post','/applyapp.cgi','action_mode=apply&rc_service=restart_wireless&wl0_macmode='+(a.length?'deny':'disabled')+'&wl0_maclist_x='+enc(a)+'&wl1_macmode='+(b.length?'deny':'disabled')+'&wl1_maclist_x='+enc(b));ap='A:'+y.status}catch(e){ap='A:ERR '+e.message}
+ if(await ok(4))return;
+ const H={'User-Agent':'asusrouter--DUTUtil-',Referer:'http://'+r.ip+'/Advanced_ACL_Content.asp',Cookie:r.ck,'Content-Type':'application/x-www-form-urlencoded'};
+ const F=(u,l,sc)=>'current_page=Advanced_ACL_Content.asp&next_page=Advanced_ACL_Content.asp&action_mode=apply&action_wait=5&action_script='+sc+'&wl_unit='+u+'&wl_subunit=-1&wl_macmode='+(l.length?'deny':'disabled')+'&wl_maclist_x='+enc(l);
+ try{const y=await aReq(r,'post','/start_apply.htm',F(0,a,''),{headers:H});ap+=' B0:'+y.status}catch(e){ap+=' B0:ERR '+e.message}
+ try{const y=await aReq(r,'post','/start_apply.htm',F(1,b,'restart_wireless'),{headers:H});ap+=' B1:'+y.status}catch(e){ap+=' B1:ERR '+e.message}
+ if(await ok(6))return;
+ throw new Error('রাউটার পরিবর্তন নেয়নি | '+ap+' | এখন: '+lv)}
 /* ---------- content block (ASUS URL filter) ---------- */
 const WEB={tiktok:['tiktok.com','tiktokv.com','tiktokcdn.com','byteoversea.com','musical.ly'],instagram:['instagram.com','cdninstagram.com'],facebook:['facebook.com','fbcdn.net','fb.com','messenger.com'],youtube:['youtube.com','googlevideo.com','ytimg.com','youtu.be'],snapchat:['snapchat.com','sc-cdn.net'],x:['twitter.com','twimg.com'],adult:['porn','xvideos','xnxx','xhamster','redtube','youporn','sex.com','hentai'],gambling:['bet365','1xbet','melbet','mostbet','parimatch','22bet','betway','betting'],proxy:['nordvpn','expressvpn','protonvpn','windscribe','tunnelbear','hidemyass','psiphon','proxysite','vpnbook'],games:['roblox','epicgames','steampowered','garena','miniclip','supercell'],netflix:['netflix.com','nflxvideo.net','nflximg.net']};
 const snap=r=>JSON.stringify([r.blocks,r.custom]);
@@ -251,7 +257,7 @@ async function webPush(r){const set=new Set();Object.keys(r.blocks).forEach(k=>{
 async function webSync(r,sn){
  if(r.type!=='asus'||!r.pass){toast(r.type!=='asus'?'এই রাউটারে সাইট ব্লক এখনো যোগ হয়নি, শুধু অ্যাপে সেভ হয়েছে':'রাউটারে পাঠাতে আগে রাউটার ট্যাবে এডমিন লগইন দিন');return}
  toast('রাউটারে পাঠানো হচ্ছে…');
- try{try{if(!r.ck)await aLogin(r);await webPush(r)}catch(e){r.ck='';await aLogin(r);await webPush(r)}toast('রাউটারে ব্লক হালনাগাদ হয়েছে ✓')}
+ try{try{if(!r.ck)await aLogin(r);await webPush(r)}catch(e){r.ck='';await aLogin(r);await webPush(r)}toast('রাউটারের URL ফিল্টারে সেভ হয়েছে। পুরনো ফার্মওয়্যারে HTTPS সাইট (Facebook, TikTok ইত্যাদি) আটকাতে নাও পারে')}
  catch(e){const o=JSON.parse(sn);r.blocks=o[0];r.custom=o[1];toast('রাউটারে হয়নি: '+e.message)}
  save();render()}
 async function rProbe(r){try{if(!r.pass)return 'আগে এই রাউটারে এডমিন লগইন দিন, তারপর টেস্ট চাপুন';
@@ -267,17 +273,18 @@ async function detect(r){const pick=t=>/tenda/.test(t)?'tenda':/asus/.test(t)?'a
   const k=pick(((typeof x.data==='string'?x.data:'')+JSON.stringify(x.headers||{})+(x.url||'')).toLowerCase());if(k)return k}catch(e){}}return ''}
 const AD={tenda:{login:tLogin,clients:tClients,block:tBlock},asus:{login:aLogin,clients:aClients,block:aBlock}};
 async function doBlock(r,d,on,auto){const A=AD[r.type];
- if(A&&r.pass&&d.addr){if(r.type==='asus'&&!auto&&!confirm('ওয়াইফাই কয়েক সেকেন্ডের জন্য বন্ধ হবে। চালিয়ে যাবেন?'))return false;try{try{if(!r.ck)await A.login(r);await A.block(r,d.addr,on,d.name)}catch(e){r.ck='';await A.login(r);await A.block(r,d.addr,on,d.name)}}
-  catch(e){toast('রাউটারে হয়নি: '+e.message);return false}d.blocked=on;d.real=true}
+ if(A&&r.pass&&d.addr){if(r.type==='asus'&&!auto&&!confirm('ওয়াইফাই কয়েক সেকেন্ডের জন্য বন্ধ হবে। চালিয়ে যাবেন?'))return false;if(r.type==='asus')toast('রাউটারে পাঠানো হচ্ছে, ৩০-৪০ সেকেন্ড লাগতে পারে…');try{try{if(!r.ck)await A.login(r);await A.block(r,d.addr,on,d.name)}catch(e){r.ck='';await A.login(r);await A.block(r,d.addr,on,d.name)}}
+  catch(e){r.err='ব্লক ব্যর্থ: '+e.message;save();toast('রাউটারে হয়নি: '+e.message);return false}r.err='';d.blocked=on;d.real=true}
  else{toast('রাউটারে হয়নি: '+(!A?'রাউটারের ধরন চেনা যায়নি — রাউটার ট্যাবে টেস্ট চাপুন':!r.pass?'রাউটার ট্যাবে আগে এডমিন লগইন দিন':'MAC পাওয়া যায়নি — ডিভাইস ট্যাবে ⟳ চাপুন'));render();return false}
  if(!on)d.expired=false;save();render();return true}
 async function syncRouter(q){const r=cur();if(!r||scanning)return;if(!r.type&&r.online!==false){r.type=await detect(r);save()}const A=AD[r.type];if(!A||!r.pass)return sweep(q);
  scanning=true;render();
  try{let list;try{if(!r.ck)await A.login(r);list=await A.clients(r)}catch(e){r.ck='';await A.login(r);list=await A.clients(r)}
   r.devices.forEach(d=>{if(d.addr)d.on=false});
-  list.forEach(c=>{if(!c.mac)return;const d=r.devices.find(x=>x.addr===c.mac);
-   if(d){d.ip=c.ip;d.on=true;if(!d.renamed&&c.name)d.name=c.name}
+  list.forEach(c=>{if(!c.mac)return;const d=r.devices.find(x=>x.addr===c.mac)||r.devices.find(x=>!x.addr&&x.ip&&x.ip===c.ip);
+   if(d){d.addr=c.mac;d.ip=c.ip;d.on=true;if(!d.renamed&&c.name)d.name=c.name}
    else r.devices.push({id:uid(),name:c.me?'এই ফোন':(c.name||c.mac.slice(-5)),addr:c.mac,ip:c.ip,blocked:false,limit:0,on:true})});
+  r.devices=r.devices.filter(d=>d.addr||list.some(c=>c.ip&&c.ip===d.ip));
   r.err='';if(!q)toast(list.length+' টি ডিভাইস পাওয়া গেছে')}
  catch(e){r.err=e.message;if(!q)toast(e.message)}
  scanning=false;save();render()}
