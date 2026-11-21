@@ -136,7 +136,7 @@ async function sample(){const r=cur();if(!r||!r.pass||!r.type||busy||document.hi
  try{const l=await raw(r),now=Date.now(),k=ymd(now),U=S.usage[r.id]=S.usage[r.id]||{},D=U[k]=U[k]||{};let any=false;r.nv={};r.on=[];
   l.forEach(o=>{if(!o.mac)return;r.on.push(o.mac);const d=S.dev[o.mac]=S.dev[o.mac]||{};if(o.ip)d.ip=o.ip;if(!d.custom&&o.nm)d.name=o.nm;
    const b=bytesOf(r,o,now);if(b!=null){any=true;if(b>0)D[o.mac]=(D[o.mac]||0)+b}});
-  r.pv=r.nv;r.lt=now;r.err='';r.hasUse=any;r.online=true;lastOk=now;
+  r.pv=r.nv;r.lt=now;r.err='';r.hasUse=any;r.online=true;lastOk=now;if(!any)r.note=Object.keys(l[0]||{}).join(', ').slice(0,400);
   Object.keys(U).sort().slice(0,-400).forEach(x=>delete U[x])}
  catch(e){r.err=e.message}
  busy=false;save();if(!$('#bk').classList.contains('open')&&tab!=='rep')render()}
@@ -151,7 +151,7 @@ function gate(r){
  if(!r.pass||!r.ip)return `<div class="card"><div class="nm">রাউটারে লগইন দিন</div><p class="ds">ডিভাইসের হিসাব রাখতে রাউটারের এডমিন ইউজারনেম ও পাসওয়ার্ড লাগবে।</p><button class="btn" onclick="setupForm()">রাউটার সেটিংস</button></div>`;
  if(!r.type)return `<div class="card"><div class="nm">রাউটারের ধরন চেনা যায়নি</div><p class="ds">সেটিংসে গিয়ে ব্র্যান্ড বেছে নিন।</p><button class="btn" onclick="setupForm()">ব্র্যান্ড বাছুন</button></div>`;
  return ''}
-const warn=r=>(r.hasUse===false?`<div class="card"><div class="nm" style="color:var(--r)">এই রাউটার ডিভাইস-ভিত্তিক ডেটা দিচ্ছে না</div><p class="ds">তাই ব্যবহারের হিসাব রাখা যাচ্ছে না।</p></div>`:'')+(r.err?`<div class="card ds" style="color:var(--r)">${esc(r.err)}</div>`:'');
+const warn=r=>(r.hasUse===false?`<div class="card"><div class="nm" style="color:var(--r)">এই রাউটার ডিভাইস-ভিত্তিক ডেটা দিচ্ছে না</div><p class="ds">তাই ব্যবহারের হিসাব রাখা যাচ্ছে না। রাউটার যে তথ্যগুলো দেয়: <span style="word-break:break-all">${esc(r.note||'')}</span></p></div>`:'')+(r.err?`<div class="card ds" style="color:var(--r)">${esc(r.err)}</div>`:'');
 function devCard(m,bytes,mx,on,showIp){const d=S.dev[m]||{};return `<div class="card"><div class="row"><div class="ic">${on===false?'💤':'📱'}</div><div class="sp"><div class="nm" onclick="renameDev('${m}')">${esc(d.name||m)} ✎</div><div class="ds">${esc((showIp&&d.ip?d.ip+' · ':'')+m)}</div></div><div style="text-align:right">${on===true?'<span class="pill ok"><i></i>কানেক্টেড</span>':''}<b style="font-size:17px;display:block;${on===true?'margin-top:4px':''}">${fmt(bytes)}</b></div></div><div class="bar"><div style="width:${Math.max(2,mx?bytes/mx*100:0)}%"></div></div></div>`}
 function vDev(r){const g=gate(r);if(g)return g;
  const T=(S.usage[r.id]||{})[ymd(Date.now())]||{},on=r.on||[],all=Array.from(new Set(on.concat(Object.keys(T))));
