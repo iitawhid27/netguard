@@ -258,14 +258,16 @@ async function rProbe(r){try{if(!r.pass)return 'আগে এই রাউটা
 async function tpProbe(r){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;let o='';
  for(const f of ['keys','auth']){try{const x=await P.post({url:'http://'+r.ip+'/cgi-bin/luci/;stok=/login?form='+f,headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},data:'operation=read',connectTimeout:5000,readTimeout:5000});o+=f+': '+String(typeof x.data==='string'?x.data:JSON.stringify(x.data)).slice(0,110)+' | '}catch(e){o+=f+': ERR '+e.message+' | '}}
  return 'TP-Link প্রোব → '+o}
-async function detect(r){const x=await hget('http://'+r.ip+'/',3000),t=(x&&typeof x.data==='string'?x.data:'').toLowerCase();return /tenda/.test(t)?'tenda':/asus/.test(t)?'asus':/tp-?link/.test(t)?'tplink':''}
+async function detect(r){const pick=t=>/tenda/.test(t)?'tenda':/asus/.test(t)?'asus':/tp-?link|tplink/.test(t)?'tplink':'';
+ for(const p of ['/','/Main_Login.asp']){const x=await hget('http://'+r.ip+p,3500);if(!x)continue;
+  const t=((typeof x.data==='string'?x.data:'')+JSON.stringify(x.headers||{})+(x.url||'')).toLowerCase(),k=pick(t);if(k)return k}return ''}
 const AD={tenda:{login:tLogin,clients:tClients,block:tBlock},asus:{login:aLogin,clients:aClients,block:aBlock}};
 async function doBlock(r,d,on,auto){const A=AD[r.type];
  if(A&&r.pass&&d.addr){if(r.type==='asus'&&!auto&&!confirm('ওয়াইফাই কয়েক সেকেন্ডের জন্য বন্ধ হবে। চালিয়ে যাবেন?'))return false;try{try{if(!r.ck)await A.login(r);await A.block(r,d.addr,on,d.name)}catch(e){r.ck='';await A.login(r);await A.block(r,d.addr,on,d.name)}}
   catch(e){toast('রাউটারে হয়নি: '+e.message);return false}d.blocked=on;d.real=true}
  else{toast('রাউটারে হয়নি: '+(!A?'রাউটারের ধরন চেনা যায়নি — রাউটার ট্যাবে টেস্ট চাপুন':!r.pass?'রাউটার ট্যাবে আগে এডমিন লগইন দিন':'MAC পাওয়া যায়নি — ডিভাইস ট্যাবে ⟳ চাপুন'));render();return false}
  if(!on)d.expired=false;save();render();return true}
-async function syncRouter(q){const r=cur();if(!r||scanning)return;const A=AD[r.type];if(!A||!r.pass)return sweep(q);
+async function syncRouter(q){const r=cur();if(!r||scanning)return;if(!r.type&&r.online!==false){r.type=await detect(r);save()}const A=AD[r.type];if(!A||!r.pass)return sweep(q);
  scanning=true;render();
  try{let list;try{if(!r.ck)await A.login(r);list=await A.clients(r)}catch(e){r.ck='';await A.login(r);list=await A.clients(r)}
   r.devices.forEach(d=>{if(d.addr)d.on=false});
