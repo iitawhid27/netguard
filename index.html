@@ -107,7 +107,7 @@ const QUICK=[['adult','🔞 ১৮+'],['tiktok','🎵 TikTok'],['instagram','�
 /* ---------- router ---------- */
 async function ping(ip){return !!(await hget('http://'+ip,4000))}
 async function test(id){const r=S.routers.find(x=>x.id===id);if(!r)return;r.online=null;render();
- r.online=await ping(r.ip);if(r.online){r.type=await detect(r);if(r.type==='tplink'){try{r.err=await tpProbe(r)}catch(e){r.err='প্রোব ব্যর্থ: '+e.message}}}save();render();toast(r.online?'রাউটার পাওয়া গেছে':'রাউটারে পৌঁছানো যাচ্ছে না')}
+ r.online=await ping(r.ip);if(r.online){r.type=await detect(r);if(r.type==='tplink'){try{r.err=await tpProbe(r)}catch(e){r.err='প্রোব ব্যর্থ: '+e.message}}else if(r.type==='asus'||r.type==='tenda'){r.err=await rProbe(r)}}save();render();toast(r.online?'রাউটার পাওয়া গেছে':'রাউটারে পৌঁছানো যাচ্ছে না')}
 function routerForm(first){return `<label>রাউটারের নাম</label><input id="rn" placeholder="যেমন: বাসার রাউটার">
 <label>রাউটার IP</label><input id="ri" inputmode="decimal" placeholder="192.168.0.1" value="${first?'192.168.0.1':''}">
 <label>ইউজারনেম</label><input id="ru" placeholder="admin" autocapitalize="off">
@@ -122,7 +122,7 @@ function setActive(id){S.active=id;save();render()}
 
 /* ---------- actions ---------- */
 function setPaused(){const r=cur();r.paused=!r.paused;save();render()}
-function setBlock(k){const r=cur();r.blocks[k]=!r.blocks[k];save();render()}
+function setBlock(k){const r=cur(),sn=snap(r);r.blocks[k]=!r.blocks[k];save();render();webSync(r,sn)}
 function addDev(){const n=$('#dn').value.trim(),m=$('#dm').value.trim();if(!n||!m)return toast('নাম ও MAC/IP দিন');
  cur().devices.push({id:uid(),name:n,addr:m,blocked:false,limit:0});save();closeM();render()}
 const left=ms=>{const m=Math.max(0,Math.floor(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return d?d+' দিন '+h+' ঘন্টা':h?h+' ঘন্টা '+m%60+' মিনিট':m+' মিনিট'};
@@ -143,7 +143,7 @@ function saveCtl(id){const d=cur().devices.find(x=>x.id===id);
  if(until&&until<=Date.now())return toast('সময় ভবিষ্যতের দিতে হবে');
  if(v>0){d.lv=v;d.lu=u;d.limit=u==='KB'?v*8:v*1000}else{d.lv=0;d.limit=0}
  d.until=until;if(until&&d.expired){d.blocked=false;d.expired=false}
- save();closeM();render();toast('সেভ হয়েছে')}
+ save();closeM();render();toast(v>0?'স্পিড লিমিট এখনো রাউটারে যায় না, শুধু অ্যাপে সেভ হয়েছে':'সেভ হয়েছে')}
 function blockNow(id){const r=cur(),d=r.devices.find(x=>x.id===id);d.until=0;d.expired=false;closeM();doBlock(r,d,true)}
 function tick(){let c=0;S.routers.forEach(r=>r.devices.forEach(d=>{if(d.until&&Date.now()>=d.until){d.until=0;d.expired=true;c=1;doBlock(r,d,true,true)}}));if(c){save();render()}}
 setInterval(tick,20000);document.addEventListener('visibilitychange',tick);
@@ -151,8 +151,8 @@ function devBlock(id){const r=cur(),d=r.devices.find(x=>x.id===id);doBlock(r,d,!
 function devLimit(id,v){cur().devices.find(x=>x.id===id).limit=+v;save();render()}
 function delDev(id){const r=cur();r.devices=r.devices.filter(x=>x.id!==id);save();render()}
 function addCustom(){const i=$('#cd'),v=i.value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');if(!v)return;
- const r=cur();if(!r.custom.includes(v))r.custom.push(v);save();render()}
-function delCustom(v){const r=cur();r.custom=r.custom.filter(x=>x!==v);save();render()}
+ const r=cur(),sn=snap(r);if(!r.custom.includes(v))r.custom.push(v);save();render();webSync(r,sn)}
+function delCustom(v){const r=cur(),sn=snap(r);r.custom=r.custom.filter(x=>x!==v);save();render();webSync(r,sn)}
 function vpnBlock(){const r=cur();r.vpnBlock=!r.vpnBlock;save();render()}
 function addVpn(){const n=$('#vn').value.trim(),s=$('#vs').value.trim();if(!n||!s)return toast('নাম ও সার্ভার দিন');
  cur().vpns.push({id:uid(),name:n,server:s,on:false});save();closeM();render()}
@@ -236,6 +236,25 @@ async function aBlock(r,mac,on){
  const has=(v,k)=>String(v[k]||'').toUpperCase().includes(mac);
  for(let i=0;i<8;i++){await sleep(4000);try{const v=await rd();if(v&&has(v,'wl0_maclist_x')===on&&has(v,'wl1_maclist_x')===on)return}catch(e){}}
  throw new Error('রাউটার পরিবর্তন নেয়নি')}
+/* ---------- content block (ASUS URL filter) ---------- */
+const WEB={tiktok:['tiktok.com','tiktokv.com','tiktokcdn.com','byteoversea.com','musical.ly'],instagram:['instagram.com','cdninstagram.com'],facebook:['facebook.com','fbcdn.net','fb.com','messenger.com'],youtube:['youtube.com','googlevideo.com','ytimg.com','youtu.be'],snapchat:['snapchat.com','sc-cdn.net'],x:['twitter.com','twimg.com'],adult:['porn','xvideos','xnxx','xhamster','redtube','youporn','sex.com','hentai'],gambling:['bet365','1xbet','melbet','mostbet','parimatch','22bet','betway','betting'],proxy:['nordvpn','expressvpn','protonvpn','windscribe','tunnelbear','hidemyass','psiphon','proxysite','vpnbook'],games:['roblox','epicgames','steampowered','garena','miniclip','supercell'],netflix:['netflix.com','nflxvideo.net','nflximg.net']};
+const snap=r=>JSON.stringify([r.blocks,r.custom]);
+async function webPush(r){const set=new Set();Object.keys(r.blocks).forEach(k=>{if(r.blocks[k]&&WEB[k])WEB[k].forEach(x=>set.add(x))});r.custom.forEach(x=>set.add(x));
+ const l=[...set];if(l.length>64)throw new Error('ASUS-এ সর্বোচ্চ ৬৪টি রুল — কিছু ব্লক বন্ধ করুন');
+ const rd=async()=>jd(await aReq(r,'get','/appGet.cgi?hook=nvram_get(url_enable_x);nvram_get(url_rulelist)',null)),on=l.length?'1':'0';
+ try{await aReq(r,'post','/applyapp.cgi','action_mode=apply&rc_service=restart_firewall&url_enable_x='+on+'&url_date_x=1111111&url_time_x=00002359&url_rulelist='+encodeURIComponent(l.map(x=>'<'+x).join('')))}catch(e){}
+ for(let i=0;i<6;i++){await sleep(2000);try{const v=await rd();if(v&&String(v.url_enable_x)===on){const g=String(v.url_rulelist||'').split('<').filter(Boolean);if(g.length===l.length&&l.every(x=>g.includes(x)))return}}catch(e){}}
+ throw new Error('রাউটার পরিবর্তন নেয়নি')}
+async function webSync(r,sn){
+ if(r.type!=='asus'||!r.pass){toast(r.type!=='asus'?'এই রাউটারে সাইট ব্লক এখনো যোগ হয়নি, শুধু অ্যাপে সেভ হয়েছে':'রাউটারে পাঠাতে আগে রাউটার ট্যাবে এডমিন লগইন দিন');return}
+ toast('রাউটারে পাঠানো হচ্ছে…');
+ try{try{if(!r.ck)await aLogin(r);await webPush(r)}catch(e){r.ck='';await aLogin(r);await webPush(r)}toast('রাউটারে ব্লক হালনাগাদ হয়েছে ✓')}
+ catch(e){const o=JSON.parse(sn);r.blocks=o[0];r.custom=o[1];toast('রাউটারে হয়নি: '+e.message)}
+ save();render()}
+async function rProbe(r){try{if(!r.pass)return 'আগে এই রাউটারে এডমিন লগইন দিন, তারপর টেস্ট চাপুন';
+ const A=AD[r.type];try{if(!r.ck)await A.login(r)}catch(e){r.ck='';await A.login(r)}
+ const x=r.type==='asus'?await aReq(r,'get','/appGet.cgi?hook=nvram_get(productid);nvram_get(buildno);nvram_get(extendno);nvram_get(qos_enable);nvram_get(qos_type);nvram_get(qos_bw_rulelist);nvram_get(MULTIFILTER_ENABLE);nvram_get(MULTIFILTER_MAC);nvram_get(MULTIFILTER_MACFILTER_DAYTIME)',null):await tReq(r,'get','/goform/getQos?random='+Math.random()+'&modules=onlineList',null);
+ return 'প্রোব → '+String(typeof x.data==='string'?x.data:JSON.stringify(x.data)).slice(0,700)}catch(e){return 'প্রোব ব্যর্থ: '+e.message}}
 async function tpProbe(r){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;let o='';
  for(const f of ['keys','auth']){try{const x=await P.post({url:'http://'+r.ip+'/cgi-bin/luci/;stok=/login?form='+f,headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},data:'operation=read',connectTimeout:5000,readTimeout:5000});o+=f+': '+String(typeof x.data==='string'?x.data:JSON.stringify(x.data)).slice(0,110)+' | '}catch(e){o+=f+': ERR '+e.message+' | '}}
  return 'TP-Link প্রোব → '+o}
@@ -244,7 +263,7 @@ const AD={tenda:{login:tLogin,clients:tClients,block:tBlock},asus:{login:aLogin,
 async function doBlock(r,d,on,auto){const A=AD[r.type];
  if(A&&r.pass&&d.addr){if(r.type==='asus'&&!auto&&!confirm('ওয়াইফাই কয়েক সেকেন্ডের জন্য বন্ধ হবে। চালিয়ে যাবেন?'))return false;try{try{if(!r.ck)await A.login(r);await A.block(r,d.addr,on,d.name)}catch(e){r.ck='';await A.login(r);await A.block(r,d.addr,on,d.name)}}
   catch(e){toast('রাউটারে হয়নি: '+e.message);return false}d.blocked=on;d.real=true}
- else{d.blocked=on;d.real=false;toast('শুধু অ্যাপে সেভ হয়েছে, রাউটারে নয়')}
+ else{toast('রাউটারে হয়নি: '+(!A?'রাউটারের ধরন চেনা যায়নি — রাউটার ট্যাবে টেস্ট চাপুন':!r.pass?'রাউটার ট্যাবে আগে এডমিন লগইন দিন':'MAC পাওয়া যায়নি — ডিভাইস ট্যাবে ⟳ চাপুন'));render();return false}
  if(!on)d.expired=false;save();render();return true}
 async function syncRouter(q){const r=cur();if(!r||scanning)return;const A=AD[r.type];if(!A||!r.pass)return sweep(q);
  scanning=true;render();
