@@ -138,29 +138,45 @@ ${failed?`<button class="btn" onclick="autoAdd()">আবার খুঁজু�
 async function autoAdd(){searching=true;failed=false;render();const l=await findGw();searching=false;
  if(!l.length){failed=true;render();return}
  l.forEach((ip,i)=>{if(!S.routers.some(x=>x.ip===ip))S.routers.push(mk(ip,i?'রাউটার '+(i+1):'আমার রাউটার'))});
- if(!cur())S.active=S.routers[0].id;save();render()}
+ if(!cur())S.active=S.routers[0].id;save();render();sweep(1)}
 async function findMore(){toast('খোঁজা হচ্ছে…');const l=await findGw();let n=0;
  l.forEach(ip=>{if(!S.routers.some(x=>x.ip===ip)){S.routers.push(mk(ip,'রাউটার '+(S.routers.length+1)));n++}});save();render();toast(n?n+'টি নতুন রাউটার পাওয়া গেছে':'নতুন রাউটার পাওয়া যায়নি')}
 function credForm(id){const r=S.routers.find(x=>x.id===id);modal(`<h3>এডমিন লগইন</h3><label>ইউজারনেম</label><input id="cu" value="${esc(r.user)}" placeholder="admin" autocapitalize="off"><label>পাসওয়ার্ড</label><div class="pw"><input id="cp" type="password" value="${esc(r.pass)}" placeholder="রাউটারের এডমিন পাসওয়ার্ড"><button onclick="const i=$('#cp');i.type=i.type=='password'?'text':'password'">👁</button></div><div style="height:18px"></div><button class="btn" onclick="saveCred('${id}')">সেভ করুন</button>`)}
 function saveCred(id){const r=S.routers.find(x=>x.id===id);r.user=$('#cu').value.trim();r.pass=$('#cp').value;save();closeM();render();toast('সেভ হয়েছে')}
-function go(t){tab=t;render();scrollTo(0,0)}
+let scanning=false,lastScan=0;
+const act=r=>r.devices.filter(d=>d.on!==false);
+async function alive(ip){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;if(!P)return{ok:false,ms:0,msg:'NoPlugin'};const t=Date.now();
+ try{await P.get({url:'http://'+ip+':80/',connectTimeout:900,readTimeout:900});return{ok:true,ms:Date.now()-t,msg:'open'}}
+ catch(e){const ms=Date.now()-t,msg=String((e&&e.message)||e);return{ok:/refus/i.test(msg)||(ms<600&&!/time|unreach|route/i.test(msg)),ms,msg}}}
+async function sweep(q){const r=cur();if(!r||scanning)return;const base=r.ip.split('.').slice(0,3).join('.');
+ if(!/^\d+\.\d+\.\d+$/.test(base))return;scanning=true;lastScan=Date.now();if(!q)toast('ডিভাইস খোঁজা হচ্ছে…');render();
+ const ips=[],found=[],rs=[];for(let i=2;i<255;i++){if(base+'.'+i!==r.ip)ips.push(base+'.'+i)}
+ for(let i=0;i<ips.length;i+=40){const b=ips.slice(i,i+40),res=await Promise.all(b.map(alive));b.forEach((ip,k)=>{rs.push(res[k]);if(res[k].ok)found.push(ip)})}
+ const fast=rs.filter(x=>x.ms<600).length,smp=(rs.find(x=>x.ms<600&&!x.ok)||rs.find(x=>x.ms>=600)||rs[0]||{}).msg;
+ r.diag='v3 · পরীক্ষা '+rs.length+' · দ্রুত '+fast+' · ধীর '+(rs.length-fast)+' · '+String(smp).slice(0,80);
+ r.devices.forEach(d=>{if(d.ip)d.on=found.includes(d.ip)});
+ found.forEach(ip=>{if(!r.devices.some(d=>d.ip===ip))r.devices.push({id:uid(),name:'ডিভাইস '+ip.split('.')[3],addr:'',ip,blocked:false,limit:0,on:true})});
+ scanning=false;save();render();if(!q||found.length)toast(found.length+' টি ডিভাইস পাওয়া গেছে')}
+function renameDev(id){const d=cur().devices.find(x=>x.id===id);modal(`<h3>নাম বদলান</h3><label>নাম</label><input id="rnm" value="${esc(d.name)}"><div style="height:18px"></div><button class="btn" onclick="saveName('${id}')">সেভ করুন</button>`)}
+function saveName(id){const v=$('#rnm').value.trim();if(v)cur().devices.find(x=>x.id===id).name=v;save();closeM();render()}
+function go(t){tab=t;render();scrollTo(0,0);if((t==='home'||t==='dev')&&Date.now()-lastScan>60000)sweep(1)}
 
 /* ---------- views ---------- */
 function pillOf(r){return r.online===null?'<span class="pill"><i></i>চেক হচ্ছে</span>':r.online?'<span class="pill ok"><i></i>অনলাইন</span>':'<span class="pill bad"><i></i>পৌঁছানো যাচ্ছে না</span>'}
 function vHome(r){
- const n=r.devices.length,bl=r.devices.filter(d=>d.blocked).length,lm=r.devices.filter(d=>d.limit).length;
+ const D=act(r),n=D.length,bl=D.filter(d=>d.blocked).length,lm=D.filter(d=>d.limit).length;
  const all=CAT.flatMap(c=>c[1]).map(a=>a[0]),nb=all.filter(k=>r.blocks[k]).length+r.custom.length,vp=r.vpns.find(v=>v.on);
- const dots=r.devices.map((d,i)=>{const a=i*2.399,q=24+(i*37)%22;return `<i class="nd ${d.blocked?'bk':d.limit?'lm':''}" style="left:${50+q*Math.cos(a)}%;top:${50+q*Math.sin(a)}%;animation-delay:${(i%7)*.4}s"></i>`}).join('');
+ const dots=D.map((d,i)=>{const a=i*2.399,q=24+(i*37)%22;return `<i class="nd ${d.blocked?'bk':d.limit?'lm':''}" style="left:${50+q*Math.cos(a)}%;top:${50+q*Math.sin(a)}%;animation-delay:${(i%7)*.4}s"></i>`}).join('');
  return `<div class="hero ${r.paused?'off':''}"><div class="row" style="position:relative"><div class="sp"><div class="nm" style="font-size:22px">${esc(r.name)}</div><div class="ds">${esc(r.ip)}</div></div>${pillOf(r)}</div>
- <div class="radar"><i class="rg" style="inset:0"></i><i class="rg" style="inset:17%"></i><i class="rg" style="inset:34%"></i><div class="sweep"></div>${dots}<div class="core"><b>${n}</b><span>ডিভাইস</span></div></div>
+ <div class="radar"><i class="rg" style="inset:0"></i><i class="rg" style="inset:17%"></i><i class="rg" style="inset:34%"></i><div class="sweep"></div>${dots}<div class="core"><b>${n}</b><span>${scanning?'খোঁজা হচ্ছে…':'ডিভাইস'}</span></div></div>
  <div class="lg"><span><i class="nd"></i>সক্রিয়</span><span><i class="nd bk"></i>ব্লকড</span><span><i class="nd lm"></i>লিমিট</span></div>
  <button class="btn sm ${r.paused?'rd':'gh'}" style="width:100%" onclick="setPaused()">${r.paused?'⏵ ইন্টারনেট চালু করুন':'⏸ সব ইন্টারনেট বন্ধ'}</button></div>
  <div class="grid"><div class="st"><b>${n-bl}</b><span>সক্রিয়</span></div><div class="st"><b style="color:var(--r)">${bl}</b><span>ব্লকড ডিভাইস</span></div>
  <div class="st"><b style="color:var(--w)">${lm}</b><span>স্পিড লিমিট</span></div><div class="st"><b style="color:var(--a)">${nb}</b><span>ব্লকড অ্যাপ/সাইট</span></div></div>
  <div class="sec">দ্রুত ব্লক</div><div class="chips">${QUICK.map(q=>`<button class="chip ${r.blocks[q[0]]?'on':''}" onclick="setBlock('${q[0]}')">${q[1]}</button>`).join('')}</div>
  <div class="card row" onclick="go('vpn')"><div class="ic">🔐</div><div class="sp"><div class="nm">ভিপিএন</div><div class="ds">${vp?esc(vp.name)+' সংযুক্ত':'সংযুক্ত নেই'}</div></div><span class="pill ${vp?'ok':''}"><i></i>${vp?'চালু':'বন্ধ'}</span></div>`}
-function vDev(r){return `<div class="row" style="margin-bottom:6px"><div class="sp"><h2>ডিভাইস</h2><p class="sub" style="margin:0">ব্লক ও স্পিড লিমিট</p></div><button class="fab" onclick="devForm()">+</button></div>
- <div style="height:12px"></div>`+(r.devices.length?r.devices.map(d=>`<div class="card"><div class="row"><div class="ic">📱</div><div class="sp"><div class="nm">${esc(d.name)}</div><div class="ds">${esc((d.ip?d.ip+" · ":"")+d.addr)}</div></div>
+function vDev(r){return `<div class="row" style="margin-bottom:6px"><div class="sp"><h2>ডিভাইস</h2><p class="sub" style="margin:0">${scanning?'খোঁজা হচ্ছে…':act(r).length+' টি অনলাইন · ব্লক ও লিমিট'}</p></div><button class="fab" style="margin-right:8px" onclick="sweep()">⟳</button><button class="fab" onclick="devForm()">+</button></div>
+ <div style="height:12px"></div>${r.diag?`<div class="ds" style="margin:-4px 2px 10px;word-break:break-all">${esc(r.diag)}</div>`:''}`+(r.devices.length?r.devices.map(d=>`<div class="card"><div class="row"><div class="ic">📱</div><div class="sp"><div class="nm" onclick="renameDev('${d.id}')">${esc(d.name)} ✎</div><div class="ds">${esc((d.on===false?"অফলাইন · ":"")+(d.ip&&d.addr?d.ip+" · "+d.addr:(d.ip||d.addr)))}</div></div>
  <span class="ds">${d.blocked?'ব্লকড':'ব্লক'}</span>${sw(d.blocked,`devBlock('${d.id}')`,1)}</div>
  <div class="row" style="margin-top:12px"><select onchange="devLimit('${d.id}',this.value)">${[[0,'ইন্টারনেট লিমিট নেই'],[1,'১ Mbps'],[2,'২ Mbps'],[5,'৫ Mbps'],[10,'১০ Mbps']].map(o=>`<option value="${o[0]}" ${d.limit==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
  <button class="btn rd sm" onclick="delDev('${d.id}')">মুছুন</button></div></div>`).join(''):`<div class="empty"><big>📱</big>কোনো ডিভাইস নেই<br><span class="ds">+ চেপে মোবাইল যোগ করুন</span></div>`)}
@@ -186,5 +202,5 @@ function render(){const r=cur(),root=$('#root');
  const N=[['home','🏠','হোম'],['dev','📱','ডিভাইস'],['block','🚫','ব্লক'],['vpn','🔐','ভিপিএন'],['router','📡','রাউটার']];
  root.innerHTML=`<div class="app"><div class="top"><div class="brand"><div class="dot">⚡</div>NetGuard</div>${tab==='home'?pillOf(r):''}</div>${V}</div>
  <div class="nav">${N.map(n=>`<button class="${tab===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('')}</div>`}
-render();
+render();if(cur())sweep(1);
 </script></body></html>
